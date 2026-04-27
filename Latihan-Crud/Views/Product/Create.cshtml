@@ -1,0 +1,26 @@
+﻿@model Product
+
+<h2>Tambah Produk Baru</h2>
+
+<div class="container-fluid-md">
+<form asp-action="Save" method="post">
+    <div class="form-group">
+        <label asp-for="Name">Nama Produk :</label>
+        <input asp-for="Name" class="form-control" focus/>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Price">Harga :</label>
+        <input asp-for="Price" class="form-control" type="number" max="100000000" 
+        oninput="if(this.value > 100000000) this.value = 100000000" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Simpan</button>
+ </form>
+ </div>
+
+ @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+ }

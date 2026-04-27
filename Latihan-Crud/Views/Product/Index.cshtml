@@ -1,0 +1,213 @@
+﻿@model IEnumerable<Product>
+
+ @* <h2>Daftar Produk di Database</h2>
+ <a asp-controller="Product" asp-action="Create" class="btn btn-primary mb-3">Tambah Data</a> *@
+
+  <!-- Search and Filter-->
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-box-seam"></i> Inventory Produk</h2>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg"></i> Tambah Data
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="mb-3">
+                    <input type="text" id="txtSearch" class="form-control" placeholder="Cari produk..." />
+                </div>
+            </form>
+        </div>
+    </div>
+ </div>
+
+  <!-- Table -->
+<table class="table table-hover table-striped shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Harga</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int pageSize = 5;
+            int currentPage = ViewBag.CurrentPage ?? 1;
+
+            // Hitung nomor awal untuk halaman ini
+            int no = (currentPage - 1) * pageSize + 1;
+        }
+        @foreach (var item in Model)
+        {
+            @* Tambahkan class "product-row" di sini *@
+            <tr class="product-row">
+                <td>@(no++)</td>
+                @* Tambahkan class "product-name" di sini *@
+                <td class="product-name">@item.Name</td>
+                <td class="product-price">@item.Price</td>
+                <td>
+                    <a asp-action="DetailProduk" asp-route-id="@item.Id" class="btn btn-success">Detail</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
+                    <a href="javascript:void(0)" class="btn btn-danger" onclick="confirmDelete('@item.Id', '@item.Name')">Hapus</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    </table>
+
+    <!-- Pagin -->
+<div class="d-flex justify-content-between align-items-center mt-3 mb-5">
+    <div class="text-muted">
+        Halaman <span class="fw-bold">@ViewBag.CurrentPage</span> dari <span class="fw-bold">@ViewBag.TotalPages</span>
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination mb-0">
+            @* Tombol Previous *@
+            @if (ViewBag.CurrentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-searchString="@ViewBag.CurrentFilter">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            }
+
+            @* Angka Halaman *@
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-searchString="@ViewBag.CurrentFilter">@i</a>
+                </li>
+            }
+
+            @* Tombol Next *@
+            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-searchString="@ViewBag.CurrentFilter">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+            }
+        </ul>
+    </nav>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        document.getElementById('txtSearch').addEventListener('keyup', function () {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('.product-row');
+
+            rows.forEach(row => {
+                // nama
+                let name = row.querySelector('.product-name').textContent.toLowerCase();
+                // price
+                let price = row.querySelector('.product-price').textContent.toLowerCase();
+                // logike
+                if(name.includes(filter) || price.includes(filter)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+              
+            });
+        });
+    </script>
+
+
+    <script>
+        // Ambil data dari memori ke variable JS
+        var tipe = '@TempData["TipeNotifikasi"]';
+        var pesan = '@TempData["Pesan"]';
+
+        if (tipe && pesan) {
+            switch (tipe) {
+                case 'tambah':
+                    Swal.fire({
+                        icon: 'success', // ikon hijau
+                        title: 'Berhasil Tambah!',
+                        text: pesan,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    break;
+                
+                case 'edit':
+                    Swal.fire({
+                        icon: 'info', // ikon biru
+                        title: 'Update Berhasil!',
+                        text: pesan,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    break;
+
+                case 'hapus':
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Terhapus',
+                        text: pesan,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    break;
+
+                case 'error':
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Waduh...',
+                        text: pesan,
+                        confirmButtonColor: '#d33'
+                    });
+                    break;
+            default:
+                Swal.fire('Notifikasi', pesan, 'info');
+                break;
+            }
+        }
+
+        function confirmDelete(id, name) {
+            Swal.fire({
+            title: 'Apakah kamu yakin?',
+            text: "Data produk '" + name + "' akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Buat form bayangan untuk mengirim POST request ke Action Delete
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/Product/Delete/' + id;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        })
+        }
+    </script>
+}
