@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Latihan_Crud</RootNamespace>
+    <UserSecretsId>f3583063-5d13-49ec-bec4-f31d57f50014</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
